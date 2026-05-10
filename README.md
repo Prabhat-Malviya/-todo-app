@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TaskManager
+
+A modern task management application built with Next.js 16, React 19, and SQLite. Features user authentication, admin panel, and full CRUD operations.
+
+## Tech Stack
+
+- **Frontend:** Next.js 16, React 19, Tailwind CSS 4
+- **Backend:** Next.js API Routes, NextAuth.js
+- **Database:** SQLite with Prisma ORM
+- **Auth:** NextAuth.js with credentials provider
+
+## Features
+
+- User registration and login
+- Create, read, update, delete tasks
+- Task filtering (all/completed/pending) and search
+- Priority levels (low/medium/high)
+- Categories and due dates
+- Dashboard statistics
+- Admin panel for user and task management
+- Role-based access control (user/admin)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone <repo-url>
+cd taskmanager
+
+# Install dependencies
+npm install
+
+# Generate Prisma client
+npx prisma generate
+
+# Run database migrations
+npx prisma migrate dev
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env` file:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+DATABASE_URL="file:./dev.db"
+NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+ADMIN_SECRET="admin123"
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## Usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Registration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Go to `/register`
+2. Enter name, email, password
+3. For admin access, enter `admin123` in Admin Secret field
+4. Login with your credentials
 
-## Deploy on Vercel
+### User Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Create tasks with title, description, priority, category, due date
+- Mark tasks as complete/incomplete
+- Edit and delete tasks
+- Filter and search tasks
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Admin Features
+
+- Access `/admin` panel
+- View all registered users
+- View all tasks across users
+- Delete users and tasks
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/register` | Register new user |
+| POST | `/api/auth/[...nextauth]` | Login/logout |
+| GET/POST | `/api/tasks` | List/create tasks |
+| GET/PUT/DELETE | `/api/tasks/[id]` | Task operations |
+| GET | `/api/stats` | Dashboard stats |
+| GET | `/api/admin/users` | List users (admin) |
+| GET/DELETE | `/api/admin/tasks` | List/delete tasks (admin) |
+
+## Demo
+
+Live demo: [Vercel Deployment URL]
+
+## Screenshots
+
+![Dashboard](public/screenshots/dashboard.png)
+![Admin Panel](public/screenshots/admin.png)
+
+## License
+
+MIT
