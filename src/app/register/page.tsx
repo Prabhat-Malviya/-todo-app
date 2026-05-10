@@ -9,6 +9,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [adminSecret, setAdminSecret] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,13 +21,18 @@ export default function RegisterPage() {
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, name }),
+      body: JSON.stringify({ email, password, name, adminSecret }),
     });
 
     setLoading(false);
 
     if (res.ok) {
-      router.push("/login");
+      const data = await res.json();
+      if (data.role === "admin") {
+        router.push("/login?registered=admin");
+      } else {
+        router.push("/login");
+      }
     } else {
       const data = await res.json();
       setError(data.error || "Registration failed");
@@ -70,6 +76,16 @@ export default function RegisterPage() {
               className="w-full p-3 border border-slate-600 rounded-lg bg-slate-700 text-white focus:outline-none focus:border-blue-500"
               minLength={6}
               required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-slate-300">Admin Secret (optional)</label>
+            <input
+              type="password"
+              value={adminSecret}
+              onChange={(e) => setAdminSecret(e.target.value)}
+              placeholder="Leave empty for regular user"
+              className="w-full p-3 border border-slate-600 rounded-lg bg-slate-700 text-white focus:outline-none focus:border-blue-500"
             />
           </div>
           <button
