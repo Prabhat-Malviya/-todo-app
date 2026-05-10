@@ -5,11 +5,6 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
-interface Token {
-  id?: string;
-  role?: string;
-}
-
 interface SessionUser {
   id: string;
   email: string;
@@ -61,7 +56,8 @@ export const authOptions = {
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: Record<string, unknown> }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
@@ -74,6 +70,7 @@ export const authOptions = {
   },
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handler = NextAuth(authOptions as any);
 
 export { handler as GET, handler as POST };

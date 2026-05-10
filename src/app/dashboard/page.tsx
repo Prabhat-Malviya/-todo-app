@@ -24,8 +24,7 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [error, setError] = useState("");
-  const [userCount, setUserCount] = useState(0);
-  const isAdmin = session?.user?.role === "admin";
+  const [, setUserCount] = useState(0);
 
   const [form, setForm] = useState({
     title: "",
@@ -98,7 +97,7 @@ export default function DashboardPage() {
         setForm({ title: "", description: "", priority: "medium", category: "general", dueDate: "" });
         fetchTasks();
       }
-    } catch (err) {
+    } catch {
       setError("Failed to save task");
     }
   };
@@ -112,7 +111,7 @@ export default function DashboardPage() {
         body: JSON.stringify({ completed: !task.completed }),
       });
       fetchTasks();
-    } catch (err) {
+    } catch {
       setError("Failed to update task");
     }
   };
@@ -125,7 +124,7 @@ export default function DashboardPage() {
           credentials: "include",
         });
         fetchTasks();
-      } catch (err) {
+      } catch {
         setError("Failed to delete task");
       }
     }

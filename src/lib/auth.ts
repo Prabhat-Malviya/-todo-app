@@ -1,14 +1,9 @@
-import NextAuth, { type SessionStrategy } from "next-auth";
+import { type SessionStrategy } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import type { DefaultSession } from "next-auth";
-
-interface Token {
-  id?: string;
-  role?: string;
-}
 
 interface SessionUser {
   id: string;
@@ -24,6 +19,7 @@ declare module "next-auth" {
 }
 
 export const authOptions = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adapter: PrismaAdapter(prisma as Parameters<typeof PrismaAdapter>[0]) as any,
   session: { strategy: "jwt" as SessionStrategy },
   providers: [
@@ -60,14 +56,16 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: { token: Record<string, unknown>; user?: Record<string, unknown> }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: Record<string, unknown> }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
