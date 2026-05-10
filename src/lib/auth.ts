@@ -1,6 +1,5 @@
 import { type SessionStrategy } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import type { DefaultSession } from "next-auth";
@@ -19,8 +18,6 @@ declare module "next-auth" {
 }
 
 export const authOptions = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  adapter: PrismaAdapter(prisma as Parameters<typeof PrismaAdapter>[0]) as any,
   session: { strategy: "jwt" as SessionStrategy },
   providers: [
     CredentialsProvider({
