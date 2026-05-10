@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 interface Task {
   id: string;
@@ -25,8 +24,6 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [error, setError] = useState("");
-  const [userCount, setUserCount] = useState(0);
-  const isAdmin = session?.user?.role === "admin";
 
   const [form, setForm] = useState({
     title: "",
@@ -41,23 +38,8 @@ export default function DashboardPage() {
   }, [status, router]);
 
   useEffect(() => {
-    if (session) {
-      fetchTasks();
-      fetchUserCount();
-    }
+    if (session) fetchTasks();
   }, [session]);
-
-  const fetchUserCount = async () => {
-    try {
-      const res = await fetch("/api/stats", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setUserCount(data.userCount);
-      }
-    } catch (err) {
-      console.error("Failed to fetch user count");
-    }
-  };
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -174,10 +156,7 @@ export default function DashboardPage() {
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-white">TaskManager</h1>
           <div className="flex items-center gap-4">
-            {isAdmin && (
-              <Link href="/admin" className="text-sm text-blue-400 hover:text-blue-300 hover:underline">Admin</Link>
-            )}
-            <span className="text-slate-300">{session?.user?.email}</span>
+            <span className="text-slate-300">{session?.user?.name || session?.user?.email}</span>
             <button
               onClick={handleLogout}
               className="text-sm text-red-400 hover:text-red-300 hover:underline"
@@ -193,11 +172,7 @@ export default function DashboardPage() {
           <div className="bg-red-900 text-red-200 p-3 rounded-lg mb-4">{error}</div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-slate-800 p-5 rounded-lg shadow-lg border border-slate-700">
-            <p className="text-slate-400 text-sm font-medium">Total Users</p>
-            <p className="text-3xl font-bold text-white mt-1">{userCount}</p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-slate-800 p-5 rounded-lg shadow-lg border border-slate-700">
             <p className="text-slate-400 text-sm font-medium">Total Tasks</p>
             <p className="text-3xl font-bold text-white mt-1">{stats.total}</p>

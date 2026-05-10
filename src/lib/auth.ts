@@ -1,4 +1,4 @@
-import NextAuth, { type SessionStrategy, type DefaultSession, type JWT, type User } from "next-auth";
+import NextAuth, { type SessionStrategy, type DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
@@ -8,22 +8,12 @@ declare module "next-auth" {
   interface Session {
     user: {
       id: string;
-      role: string;
     } & DefaultSession["user"];
   }
-  
-  interface User {
-    role?: string;
-  }
-}
-
-interface Token extends JWT {
-  id?: string;
-  role?: string;
 }
 
 export const authOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma as any),
   session: { strategy: "jwt" as SessionStrategy },
   providers: [
     CredentialsProvider({
@@ -54,22 +44,20 @@ export const authOptions = {
           return null;
         }
 
-        return { id: user.id, email: user.email, name: user.name, role: user.role || "user" };
+        return { id: user.id, email: user.email, name: user.name || user.email.split("@")[0] };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: { token: Token; user?: User }) {
+    async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: Token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
+        session.user.id = token.id;
       }
       return session;
     },

@@ -9,7 +9,6 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [adminSecret, setAdminSecret] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +20,7 @@ export default function RegisterPage() {
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, name, adminSecret }),
+      body: JSON.stringify({ email, password, name }),
     });
 
     setLoading(false);
@@ -81,16 +80,6 @@ export default function RegisterPage() {
             {loading ? "Creating account..." : "Register"}
           </button>
         </form>
-        <div className="mt-4 pt-4 border-t border-slate-700">
-          <label className="block text-sm font-medium mb-1 text-slate-300">Admin Secret (optional)</label>
-          <input
-            type="password"
-            value={adminSecret}
-            onChange={(e) => setAdminSecret(e.target.value)}
-            className="w-full p-3 border border-slate-600 rounded-lg bg-slate-700 text-white focus:outline-none focus:border-blue-500"
-            placeholder="Leave empty for regular user"
-          />
-        </div>
         <p className="mt-4 text-center text-sm text-slate-400">
           Already have an account?{" "}
           <Link href="/login" className="text-blue-400 hover:text-blue-300 hover:underline">

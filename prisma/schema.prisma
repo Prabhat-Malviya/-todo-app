@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model User {
@@ -12,7 +12,6 @@ model User {
   email     String   @unique
   password  String
   name      String?
-  role      String   @default("user")
   tasks     Task[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
