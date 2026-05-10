@@ -44,7 +44,7 @@ export const authOptions = {
           return null;
         }
 
-        return { id: user.id, email: user.email, name: user.name };
+        return { id: user.id, email: user.email, name: user.name || user.email.split("@")[0] };
       },
     }),
   ],

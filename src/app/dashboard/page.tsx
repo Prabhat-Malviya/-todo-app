@@ -156,7 +156,7 @@ export default function DashboardPage() {
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-white">TaskManager</h1>
           <div className="flex items-center gap-4">
-            <span className="text-slate-300">{session?.user?.email}</span>
+            <span className="text-slate-300">{session?.user?.name || session?.user?.email}</span>
             <button
               onClick={handleLogout}
               className="text-sm text-red-400 hover:text-red-300 hover:underline"
