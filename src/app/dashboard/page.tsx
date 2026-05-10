@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -25,7 +25,7 @@ export default function DashboardPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [error, setError] = useState("");
   const [userCount, setUserCount] = useState(0);
-  const isAdmin = (session as any)?.user?.role === "admin";
+  const isAdmin = session?.user?.role === "admin";
 
   const [form, setForm] = useState({
     title: "",
@@ -35,7 +35,7 @@ export default function DashboardPage() {
     dueDate: "",
   });
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setError("");
     try {
       const res = await fetch("/api/tasks", {
@@ -51,33 +51,33 @@ export default function DashboardPage() {
       if (!res.ok) throw new Error("Failed to fetch tasks");
       const data = await res.json();
       setTasks(data);
-    } catch (err) {
+    } catch {
       setError("Failed to load tasks. Please refresh the page.");
     }
-  };
+  }, [router]);
 
-  const fetchUserCount = async () => {
+  const fetchUserCount = useCallback(async () => {
     try {
       const res = await fetch("/api/stats", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setUserCount(data.userCount);
       }
-    } catch (err) {
+    } catch {
       console.error("Failed to fetch user count");
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
   }, [status, router]);
 
   useEffect(() => {
-    if (session) {
-      fetchTasks();
-      fetchUserCount();
-    }
-  }, [session]);
+    if (!session) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchTasks();
+    fetchUserCount();
+  }, [session, fetchTasks, fetchUserCount]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

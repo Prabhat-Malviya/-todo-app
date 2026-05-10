@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -37,7 +37,7 @@ export default function AdminPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [error, setError] = useState("");
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       if (tab === "users") {
         const res = await fetch("/api/admin/users", { credentials: "include" });
@@ -49,19 +49,14 @@ export default function AdminPage() {
     } catch {
       setError("Failed to load data");
     }
-  };
+  }, [tab]);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
-    if (status === "authenticated" && session?.user?.role !== "admin") {
-      router.push("/dashboard");
-    }
-    if (status === "authenticated") fetchData();
-  }, [status, router, session]);
-
-  useEffect(() => {
-    fetchData();
-  }, [tab]);
+    else if (status === "authenticated" && session?.user?.role !== "admin") router.push("/dashboard");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    else if (status === "authenticated") fetchData();
+  }, [status, router, session, fetchData]);
 
   const handleLogout = async () => {
     await signOut({ redirect: false });

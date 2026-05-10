@@ -1,4 +1,5 @@
-import NextAuth, { type SessionStrategy, type DefaultSession, type User } from "next-auth";
+import NextAuth, { type SessionStrategy } from "next-auth";
+import type { Adapter } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
@@ -7,11 +8,17 @@ import { prisma } from "@/lib/prisma";
 interface Token {
   id?: string;
   role?: string;
-  [key: string]: unknown;
+}
+
+interface SessionUser {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
 }
 
 export const authOptions = {
-  adapter: PrismaAdapter(prisma as unknown as any) as any,
+  adapter: PrismaAdapter(prisma as Parameters<typeof PrismaAdapter>[0]) as Adapter,
   session: { strategy: "jwt" as SessionStrategy },
   providers: [
     CredentialsProvider({
@@ -26,7 +33,7 @@ export const authOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email: credentials.email },
         });
 
         if (!user) {
@@ -34,7 +41,7 @@ export const authOptions = {
         }
 
         const isValid = await bcrypt.compare(
-          credentials.password as string,
+          credentials.password,
           user.password
         );
 
@@ -42,24 +49,24 @@ export const authOptions = {
           return null;
         }
 
-        return { id: user.id, email: user.email, name: user.name, role: "user" };
+        return { id: user.id, email: user.email, name: user.name, role: user.role } as SessionUser;
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }: { token: Token; user?: unknown }) {
+    async jwt({ token, user }: { token: Record<string, unknown>; user?: Record<string, unknown> }) {
       if (user) {
-        token.id = (user as any).id;
-        token.role = (user as any).role;
+        token.id = user.id;
+        token.role = user.role;
       }
-      return token as any;
+      return token;
     },
-    async session({ session, token }: { session: any; token: Token }) {
+    async session({ session, token }: { session: any; token: Record<string, unknown> }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
       }
-      return session as any;
+      return session;
     },
   },
   pages: {
@@ -67,6 +74,6 @@ export const authOptions = {
   },
 };
 
-const handler = NextAuth(authOptions);
+const handler = NextAuth(authOptions as any);
 
 export { handler as GET, handler as POST };

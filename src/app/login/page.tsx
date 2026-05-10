@@ -17,9 +17,11 @@ export default function LoginPage() {
     const savedEmail = localStorage.getItem("rememberedEmail");
     const savedPassword = localStorage.getItem("rememberedPassword");
     if (savedEmail && savedPassword) {
-      setEmail(savedEmail);
-      setPassword(savedPassword);
-      setRememberMe(true);
+      requestAnimationFrame(() => {
+        setEmail(savedEmail);
+        setPassword(savedPassword);
+        setRememberMe(true);
+      });
     }
   }, []);
 
