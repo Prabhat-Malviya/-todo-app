@@ -1,42 +1,17 @@
-<<<<<<< HEAD
-import NextAuth, { type SessionStrategy, type DefaultSession, type JWT, type User } from "next-auth";
-=======
-import NextAuth, { type SessionStrategy, type DefaultSession } from "next-auth";
->>>>>>> c032f8c695f8c8adb1ed3ee309ad1b59767e9b95
+import NextAuth, { type SessionStrategy, type DefaultSession, type User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-<<<<<<< HEAD
-      role: string;
-    } & DefaultSession["user"];
-  }
-  
-  interface User {
-    role?: string;
-  }
-}
-
-interface Token extends JWT {
+interface Token {
   id?: string;
   role?: string;
+  [key: string]: unknown;
 }
 
 export const authOptions = {
-  adapter: PrismaAdapter(prisma) as any,
-=======
-    } & DefaultSession["user"];
-  }
-}
-
-export const authOptions = {
-  adapter: PrismaAdapter(prisma as any),
->>>>>>> c032f8c695f8c8adb1ed3ee309ad1b59767e9b95
+  adapter: PrismaAdapter(prisma as unknown as any) as any,
   session: { strategy: "jwt" as SessionStrategy },
   providers: [
     CredentialsProvider({
@@ -67,40 +42,24 @@ export const authOptions = {
           return null;
         }
 
-<<<<<<< HEAD
-        return { id: user.id, email: user.email, name: user.name, role: user.role || "user" };
-=======
-        return { id: user.id, email: user.email, name: user.name };
->>>>>>> c032f8c695f8c8adb1ed3ee309ad1b59767e9b95
+        return { id: user.id, email: user.email, name: user.name, role: "user" };
       },
     }),
   ],
   callbacks: {
-<<<<<<< HEAD
-    async jwt({ token, user }: { token: Token; user?: User }) {
+    async jwt({ token, user }: { token: Token; user?: unknown }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        token.id = (user as any).id;
+        token.role = (user as any).role;
       }
-      return token;
+      return token as any;
     },
     async session({ session, token }: { session: any; token: Token }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
-=======
-    async jwt({ token, user }: { token: any; user: any }) {
-      if (user) {
-        token.id = user.id;
       }
-      return token;
-    },
-    async session({ session, token }: { session: any; token: any }) {
-      if (session.user) {
-        session.user.id = token.id;
->>>>>>> c032f8c695f8c8adb1ed3ee309ad1b59767e9b95
-      }
-      return session;
+      return session as any;
     },
   },
   pages: {
@@ -110,8 +69,4 @@ export const authOptions = {
 
 const handler = NextAuth(authOptions);
 
-<<<<<<< HEAD
 export { handler as GET, handler as POST };
-=======
-export { handler as GET, handler as POST };
->>>>>>> c032f8c695f8c8adb1ed3ee309ad1b59767e9b95

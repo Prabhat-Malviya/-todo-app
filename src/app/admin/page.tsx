@@ -4,6 +4,13 @@ import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
+interface SessionUser {
+  id: string;
+  email?: string | null;
+  name?: string | null;
+  role?: string;
+}
+
 interface User {
   id: string;
   email: string;
@@ -23,7 +30,7 @@ interface Task {
 }
 
 export default function AdminPage() {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession() as { data: { user: SessionUser } | null; status: string };
   const router = useRouter();
   const [tab, setTab] = useState<"users" | "tasks">("users");
   const [users, setUsers] = useState<User[]>([]);
