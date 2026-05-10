@@ -24,6 +24,8 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [error, setError] = useState("");
+  const [userCount, setUserCount] = useState(0);
+  const isAdmin = (session as any)?.user?.role === "admin";
 
   const [form, setForm] = useState({
     title: "",
@@ -32,21 +34,6 @@ export default function DashboardPage() {
     category: "general",
     dueDate: "",
   });
-
-  useEffect(() => {
-    if (status === "unauthenticated") router.push("/login");
-  }, [status, router]);
-
-  useEffect(() => {
-    if (session) fetchTasks();
-  }, [session]);
-
-  const handleLogout = async () => {
-    await signOut({ redirect: false });
-    localStorage.removeItem("rememberedEmail");
-    localStorage.removeItem("rememberedPassword");
-    router.push("/login");
-  };
 
   const fetchTasks = async () => {
     setError("");
@@ -68,6 +55,29 @@ export default function DashboardPage() {
       setError("Failed to load tasks. Please refresh the page.");
     }
   };
+
+  const fetchUserCount = async () => {
+    try {
+      const res = await fetch("/api/stats", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setUserCount(data.userCount);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user count");
+    }
+  };
+
+  useEffect(() => {
+    if (status === "unauthenticated") router.push("/login");
+  }, [status, router]);
+
+  useEffect(() => {
+    if (session) {
+      fetchTasks();
+      fetchUserCount();
+    }
+  }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,6 +156,13 @@ export default function DashboardPage() {
     total: tasks.length,
     completed: tasks.filter((t) => t.completed).length,
     pending: tasks.filter((t) => !t.completed).length,
+  };
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    localStorage.removeItem("rememberedEmail");
+    localStorage.removeItem("rememberedPassword");
+    router.push("/login");
   };
 
   if (status === "loading") return <div className="p-8 text-white">Loading...</div>;

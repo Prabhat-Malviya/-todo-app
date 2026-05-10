@@ -37,14 +37,6 @@ export default function AdminPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (status === "unauthenticated") router.push("/login");
-    if (status === "authenticated" && session?.user?.role !== "admin") {
-      router.push("/dashboard");
-    }
-    if (status === "authenticated") fetchData();
-  }, [status, router, session]);
-
   const fetchData = async () => {
     try {
       if (tab === "users") {
@@ -58,6 +50,14 @@ export default function AdminPage() {
       setError("Failed to load data");
     }
   };
+
+  useEffect(() => {
+    if (status === "unauthenticated") router.push("/login");
+    if (status === "authenticated" && session?.user?.role !== "admin") {
+      router.push("/dashboard");
+    }
+    if (status === "authenticated") fetchData();
+  }, [status, router, session]);
 
   useEffect(() => {
     fetchData();
