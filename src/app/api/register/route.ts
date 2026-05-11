@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
-
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  name: z.string().min(1).optional().or(z.literal("")),
-  adminSecret: z.string().optional(),
-});
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, password, name, adminSecret } = schema.parse(body);
+    const { email, password, name, adminSecret } = body;
+
+    if (!email || !password) {
+      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
+    }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
       { id: user.id, email: user.email, name: user.name, role: user.role },
       { status: 201 }
     );
-  } catch {
-    return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+  } catch (error) {
+    console.error("Register error:", error);
+    return NextResponse.json({ error: "Registration failed" }, { status: 400 });
   }
 }
