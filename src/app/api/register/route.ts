@@ -6,7 +6,7 @@ import { z } from "zod";
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  name: z.string().min(2).optional(),
+  name: z.string().min(1).optional().or(z.literal("")),
   adminSecret: z.string().optional(),
 });
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       data: { 
         email, 
         password: hashedPassword, 
-        name: name || "User",
+        name: name || email.split("@")[0],
         role: isAdmin ? "admin" : "user"
       },
     });
