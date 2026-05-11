@@ -41,6 +41,11 @@ export const authOptions = {
           return null;
         }
 
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { lastLogin: new Date(), lastActive: new Date() },
+        });
+
         return { id: user.id, email: user.email, name: user.name, role: user.role } as SessionUser;
       },
     }),

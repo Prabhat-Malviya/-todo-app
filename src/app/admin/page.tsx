@@ -29,6 +29,15 @@ interface Task {
   user: { email: string };
 }
 
+interface Stats {
+  totalUsers: number;
+  totalTasks: number;
+  completedTasks: number;
+  pendingTasks: number;
+  activeUsers: number;
+  loggedInUsers: number;
+}
+
 export default function AdminPage() {
   const { data: session, status } = useSession() as { data: { user: SessionUser } | null; status: string };
   const router = useRouter();
@@ -36,9 +45,13 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [error, setError] = useState("");
+  const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalTasks: 0, completedTasks: 0, pendingTasks: 0, activeUsers: 0, loggedInUsers: 0 });
 
   const fetchData = useCallback(async () => {
     try {
+      const statsRes = await fetch("/api/admin/stats", { credentials: "include" });
+      if (statsRes.ok) setStats(await statsRes.json());
+
       if (tab === "users") {
         const res = await fetch("/api/admin/users", { credentials: "include" });
         if (res.ok) setUsers(await res.json());
@@ -103,6 +116,33 @@ export default function AdminPage() {
 
       <main className="max-w-6xl mx-auto p-4">
         {error && <div className="bg-red-900 text-red-200 p-3 rounded-lg mb-4">{error}</div>}
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+          <div className="bg-slate-800 p-5 rounded-lg shadow-lg border border-slate-700">
+            <p className="text-slate-400 text-sm font-medium">Total Users</p>
+            <p className="text-3xl font-bold text-white mt-1">{stats.totalUsers}</p>
+          </div>
+          <div className="bg-slate-800 p-5 rounded-lg shadow-lg border border-slate-700">
+            <p className="text-slate-400 text-sm font-medium">Total Tasks</p>
+            <p className="text-3xl font-bold text-white mt-1">{stats.totalTasks}</p>
+          </div>
+          <div className="bg-slate-800 p-5 rounded-lg shadow-lg border border-slate-700">
+            <p className="text-slate-400 text-sm font-medium">Completed</p>
+            <p className="text-3xl font-bold text-emerald-400 mt-1">{stats.completedTasks}</p>
+          </div>
+          <div className="bg-slate-800 p-5 rounded-lg shadow-lg border border-slate-700">
+            <p className="text-slate-400 text-sm font-medium">Pending</p>
+            <p className="text-3xl font-bold text-amber-400 mt-1">{stats.pendingTasks}</p>
+          </div>
+          <div className="bg-slate-800 p-5 rounded-lg shadow-lg border border-slate-700">
+            <p className="text-slate-400 text-sm font-medium">Online Now</p>
+            <p className="text-3xl font-bold text-blue-400 mt-1">{stats.activeUsers}</p>
+          </div>
+          <div className="bg-slate-800 p-5 rounded-lg shadow-lg border border-slate-700">
+            <p className="text-slate-400 text-sm font-medium">Logged In</p>
+            <p className="text-3xl font-bold text-green-400 mt-1">{stats.loggedInUsers}</p>
+          </div>
+        </div>
 
         <div className="flex gap-4 mb-6">
           <button
