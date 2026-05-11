@@ -7,17 +7,31 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { email, password, name, adminSecret } = body;
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+    if (!email || typeof email !== "string") {
+      return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
+    }
+
+    if (!password || typeof password !== "string") {
+      return NextResponse.json({ error: "Please enter a password" }, { status: 400 });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "Please enter a valid email address" }, { status: 400 });
     }
 
     if (password.length < 6) {
       return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const existingUser = await prisma.user.findUnique({ 
+      where: { email: normalizedEmail } 
+    });
+
     if (existingUser) {
-      return NextResponse.json({ error: "User already exists" }, { status: 400 });
+      return NextResponse.json({ error: "An account with this email already exists" }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -26,19 +40,25 @@ export async function POST(req: NextRequest) {
     
     const user = await prisma.user.create({
       data: { 
-        email, 
+        email: normalizedEmail, 
         password: hashedPassword, 
-        name: name || email.split("@")[0],
+        name: (name && name.trim()) || normalizedEmail.split("@")[0],
         role: isAdmin ? "admin" : "user"
       },
     });
 
     return NextResponse.json(
-      { id: user.id, email: user.email, name: user.name, role: user.role },
+      { 
+        id: user.id, 
+        email: user.email, 
+        name: user.name, 
+        role: user.role,
+        message: isAdmin ? "Admin account created successfully!" : "Account created successfully!"
+      },
       { status: 201 }
     );
   } catch (error) {
     console.error("Register error:", error);
-    return NextResponse.json({ error: "Registration failed" }, { status: 400 });
+    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 400 });
   }
 }
