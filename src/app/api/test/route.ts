@@ -8,13 +8,15 @@ export async function GET() {
     return NextResponse.json({ 
       success: true, 
       users: userCount, 
-      tasks: taskCount 
+      tasks: taskCount,
+      message: "Database connected successfully!" 
     });
-  } catch (error) {
-    console.error("Database error:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Database error:", errorMessage);
     return NextResponse.json({ 
       success: false, 
-      error: "Database connection failed" 
+      error: errorMessage 
     }, { status: 500 });
   }
 }
