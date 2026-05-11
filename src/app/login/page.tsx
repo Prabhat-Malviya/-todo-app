@@ -42,7 +42,6 @@ export default function LoginPage() {
       email,
       password,
       redirect: false,
-      credentials: "include",
     });
 
     setLoading(false);
